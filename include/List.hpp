@@ -2,7 +2,7 @@
 //! @file				List.hpp
 //! @author				Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 //! @created			2014-10-16
-//! @last-modified		2014-10-16
+//! @last-modified		2014-10-17
 //! @brief
 //! @details
 //!						See README.rst in repo root dir for more info.
@@ -61,34 +61,40 @@ namespace MbeddedNinja
 		{
 			public:
 
-			ListNode<dataT> * currListElement;
+			ListNode<dataT> * currListNode;
 			List<dataT> * list;
 
+			//! @brief		Postfix increment.
 			Iterator & operator++(int)
 			{
-				this->currListElement = this->currListElement->nextListElement;
+				// Makes sure we are not trying to increment if we are at List::End().
+				M_ASSERT(this->currListNode);
+
+				this->currListNode = this->currListNode->nextListNode;
 				return *this;
 			}
 
 			bool operator!=(const Iterator & it)
 			{
-				if(this->currListElement != it.currListElement)
+				if(this->currListNode != it.currListNode)
 					return true;
 				else
 					return false;
 			}
 
-			bool operator<=(const Iterator & it)
+			/*bool operator<=(const Iterator & it)
 			{
 				if(this->currListElement == nullptr)
 					return false;
 				else
 					return true;
-			}
+			}*/
 
 			dataT operator*() const
 			{
-				return this->currListElement->data;
+				// Makes sure we are not trying to increment if we are at List::End().
+				M_ASSERT(this->currListNode);
+				return this->currListNode->data;
 			}
 
 		};
@@ -99,52 +105,88 @@ namespace MbeddedNinja
 
 		List() :
 			numElements(0),
-			firstElement(nullptr),
-			lastElement(nullptr)
+			firstNode(nullptr),
+			lastNode(nullptr)
 		{
 
 		}
 
-		void Insert(dataT & data, uint32_t pos)
+		//! @brief		Inserts data before the position specified by the iterator, unless there are currently no nodes in list, and in that case, inserts at start.
+		void Insert(Iterator it, dataT & data)
 		{
-			// Make sure insert position is valid
-			M_ASSERT(pos <= numElements);
+			std::cerr << __PRETTY_FUNCTION__ << " called." << std::endl;
 
-			ListNode<dataT> * listElement = new ListNode<dataT>();
+			// Make sure insert position is valid
+			//M_ASSERT(pos <= numElements);
+
+			ListNode<dataT> * listNode = new ListNode<dataT>();
 
 			// Copy data to element
-			listElement->data = data;
+			listNode->data = data;
+
 
 			// Now we need to insert it at the correct place
 			if(numElements == 0)
 			{
-				this->firstElement = listElement;
-				this->lastElement = listElement;
-				listElement->prevListElement = nullptr;
-				listElement->nextListElement = nullptr;
+				std::cout << "List is empty, inserting first node." << std::endl;
+				this->firstNode = listNode;
+				this->lastNode = listNode;
+				listNode->prevListNode = nullptr;
+				listNode->nextListNode = nullptr;
 			}
 			else
 			{
+				if(it.currListNode == nullptr)
+				{
+					// We must be past the end of the list!
+					std::cout << "We are past the end of the list!" << std::endl;
 
+
+					ListNode<dataT> * prevListNode = this->lastNode;
+					std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
+					std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+
+					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+					// Point the old list node last element to this new one
+					prevListNode->nextListNode = listNode;
+					listNode->prevListNode = prevListNode;
+
+					// We are at the last node in the list
+					listNode->nextListNode = nullptr;
+
+					this->lastNode = listNode;
+				}
+				else
+				{
+					std::cout << "We are inserting before a existing and valid node!" << std::endl;
+				}
 			}
 
 			// Increment element count
 			numElements++;
 		}
 
+		//! @brief		Returns an iterator to the first node in the list.
+		//! @details	Mimics the behaviour of std::begin().
 		Iterator Start()
 		{
+			std::cout << __PRETTY_FUNCTION__ << " called." << std::endl;
 			Iterator it;
 			it.list = this;
-			it.currListElement = this->firstElement;
+			// This could be nullptr if there are no nodes in the list
+			it.currListNode = this->firstNode;
 			return it;
 		}
 
+		//! @brief		Returns the 'past-the-end' node of the list.
+		//! @details	This behaviour is so that you can move through an iterator inside a for loop and use the it <! List::End() guard to stop the for loop. Mimics the behaviour of std::end().
 		Iterator End()
 		{
+			std::cout << __PRETTY_FUNCTION__ << " called." << std::endl;
 			Iterator it;
 			it.list = this;
-			it.currListElement = this->lastElement;
+			// Return the 'past-the-end' node, not the last node.
+			it.currListNode = nullptr;
 			return it;
 		}
 
@@ -174,8 +216,9 @@ namespace MbeddedNinja
 
 		uint32_t numElements;
 
-		ListNode<dataT> * firstElement;
-		ListNode<dataT> * lastElement;
+		//! @brief		Pointer to the first node in the list.
+		ListNode<dataT> * firstNode;
+		ListNode<dataT> * lastNode;
 
 		
 	}; // class List

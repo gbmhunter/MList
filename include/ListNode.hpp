@@ -2,7 +2,7 @@
 //! @file				ListNode.hpp
 //! @author				Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 //! @created			2014-10-16
-//! @last-modified		2014-10-16
+//! @last-modified		2014-10-17
 //! @brief
 //! @details
 //!						See README.rst in repo root dir for more info.
@@ -54,10 +54,10 @@ namespace MbeddedNinja
 		dataT data;
 
 		//! @brief		Pointer to the previous list element.
-		ListNode<dataT> * prevListElement;
+		ListNode<dataT> * prevListNode;
 
 		//! @brief		Pointer to the next list element.
-		ListNode<dataT> * nextListElement;
+		ListNode<dataT> * nextListNode;
 	};
 
 } // namespace MbeddedNinja

@@ -11,8 +11,8 @@ A microcontroller-friendly doubly-linked list container.
 
 - Author: gbmhunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 - First Ever Commit: 2014-10-16
-- Last Modified: 2014-10-16
-- Version: v1.0.0.0
+- Last Modified: 2014-10-17
+- Version: v1.1.0.0
 - Company: mbedded.ninja
 - Project: MToolkit Module
 - Language: C++
@@ -26,7 +26,7 @@ A microcontroller-friendly doubly-linked list container.
 Description
 ===========
 
-
+MList is a microcontroller-friendly doubly-linked list container.
 
 Features:
 
@@ -45,10 +45,7 @@ The following table lists all of MStrings dependencies.
 ====================== ==================== ======================================================================
 Dependency             Delivery             Usage
 ====================== ==================== ======================================================================
-<cinttypes>            C standard library   For platform agnostic printf() specifiers.
 <cstdint>              C standard library   For platform agnostic fixed-width integers.
-<cstdio>               C standard library   To use snprintf() for appending integers, floats and doubles to the ends of a string.
-<cstring>              C standard library   For use of strlen() and strcpy().
 MAssert                External module      Providing runtime safety checks against this module.
 MUnitTest              External module      Framework for unit tests.
 ====================== ==================== ======================================================================
@@ -74,5 +71,6 @@ Changelog
 ========= ========== =========================================================================================
 Version   Date       Comment
 ========= ========== =========================================================================================
+v1.1.0.0  2014-10-17 List::Insert() takes an iterator as an input parameter rather than a integer position, closes #2. Removed '<=' operator overload and instead implemented '!=' overload for halting iterator for loop, closes #1. Added unit test for inserting two nodes into list, closes #3. Removed unnecessary dependencies from README, closes #4.
 v1.0.0.0  2014-10-16 Initial commit, basic List, ListNode and Iterator objects have been implemented with one unit test.
 ========= ========== =========================================================================================
