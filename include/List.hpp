@@ -97,7 +97,7 @@ namespace MbeddedNinja
 				return this->currListNode->data;
 			}
 
-		};
+		}; // class Iterator
 
 		//======================================================================================//
 		//==================================== PUBLIC METHODS ==================================//
@@ -111,10 +111,20 @@ namespace MbeddedNinja
 
 		}
 
+		static void StaticInit(std::ostream * ostream, bool isDebugPrintingEnabled)
+		{
+			List::ostream = ostream;
+			List::isDebugPrintingEnabled = isDebugPrintingEnabled;
+		}
+
+		static std::ostream * ostream;
+		static bool isDebugPrintingEnabled;
+
 		//! @brief		Inserts data before the position specified by the iterator, unless there are currently no nodes in list, and in that case, inserts at start.
 		void Insert(Iterator it, dataT & data)
 		{
-			std::cerr << __PRETTY_FUNCTION__ << " called." << std::endl;
+			if(List::isDebugPrintingEnabled)
+				std::cerr << __PRETTY_FUNCTION__ << " called." << std::endl;
 
 			// Make sure insert position is valid
 			//M_ASSERT(pos <= numElements);
@@ -128,7 +138,8 @@ namespace MbeddedNinja
 			// Now we need to insert it at the correct place
 			if(numElements == 0)
 			{
-				std::cout << "List is empty, inserting first node." << std::endl;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "List is empty, inserting first node." << std::endl;
 				this->firstNode = listNode;
 				this->lastNode = listNode;
 				listNode->prevListNode = nullptr;
@@ -139,14 +150,19 @@ namespace MbeddedNinja
 				if(it.currListNode == nullptr)
 				{
 					// We must be past the end of the list!
-					std::cout << "We are past the end of the list!" << std::endl;
+					if(List::isDebugPrintingEnabled)
+						std::cout << "We are past the end of the list!" << std::endl;
 
 
 					ListNode<dataT> * prevListNode = this->lastNode;
-					std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
-					std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+					if(List::isDebugPrintingEnabled)
+						std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
 
-					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+					if(List::isDebugPrintingEnabled)
+						std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+
+					if(List::isDebugPrintingEnabled)
+						std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
 					// Point the old list node last element to this new one
 					prevListNode->nextListNode = listNode;
 					listNode->prevListNode = prevListNode;
@@ -158,7 +174,37 @@ namespace MbeddedNinja
 				}
 				else
 				{
-					std::cout << "We are inserting before a existing and valid node!" << std::endl;
+					if(List::isDebugPrintingEnabled)
+						std::cout << "We are inserting before a existing and valid node!" << std::endl;
+
+					//===== PREV NODE =====//
+					ListNode<dataT> * prevListNode = it.currListNode->prevListNode;
+					if(List::isDebugPrintingEnabled)
+						std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
+
+					if(List::isDebugPrintingEnabled)
+						std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+
+					if(List::isDebugPrintingEnabled)
+						std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+					// Point the old list node last element to this new one
+					prevListNode->nextListNode = listNode;
+					listNode->prevListNode = prevListNode;
+
+					//===== NEXT NODE =====//
+					ListNode<dataT> * nextListNode = it.currListNode;
+					if(List::isDebugPrintingEnabled)
+						std::cout << "currListNode = '" << nextListNode << "'." << std::endl;
+
+					if(List::isDebugPrintingEnabled)
+						std::cout << "currListNode->data = '"<< nextListNode->data << "'." << std::endl;
+
+					if(List::isDebugPrintingEnabled)
+						std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+					// Point the old list node last element to this new one
+					nextListNode->prevListNode = listNode;
+					listNode->nextListNode = nextListNode;
+
 				}
 			}
 
@@ -170,7 +216,8 @@ namespace MbeddedNinja
 		//! @details	Mimics the behaviour of std::begin().
 		Iterator Start()
 		{
-			std::cout << __PRETTY_FUNCTION__ << " called." << std::endl;
+			if(List::isDebugPrintingEnabled)
+				*List::ostream << __PRETTY_FUNCTION__ << " called." << std::endl;
 			Iterator it;
 			it.list = this;
 			// This could be nullptr if there are no nodes in the list
@@ -182,7 +229,8 @@ namespace MbeddedNinja
 		//! @details	This behaviour is so that you can move through an iterator inside a for loop and use the it <! List::End() guard to stop the for loop. Mimics the behaviour of std::end().
 		Iterator End()
 		{
-			std::cout << __PRETTY_FUNCTION__ << " called." << std::endl;
+			if(List::isDebugPrintingEnabled)
+				std::cout << __PRETTY_FUNCTION__ << " called." << std::endl;
 			Iterator it;
 			it.list = this;
 			// Return the 'past-the-end' node, not the last node.
@@ -222,6 +270,12 @@ namespace MbeddedNinja
 
 		
 	}; // class List
+
+	template < typename dataT >
+	std::ostream * List<dataT>::ostream = nullptr;
+
+	template < typename dataT >
+	bool List<dataT>::isDebugPrintingEnabled = false;
 
 
 } // namespace MbeddedNinja

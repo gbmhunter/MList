@@ -1,8 +1,8 @@
 //!
 //! @file 			main.cpp
 //! @author 		Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
-//! @created		2014-08-12
-//! @last-modified 	2014-09-13
+//! @created		2014-10-16
+//! @last-modified 	2014-10-17
 //! @brief 			Contains main entry point for unit tests.
 //! @details
 //!					See README.rst in root dir for more info.
@@ -14,13 +14,15 @@
 #include "MUnitTest/api/MUnitTestApi.hpp"
 
 //===== USER SOURCE =====//
-// none
+#include "MList/api/MListApi.hpp"
 
+using namespace MbeddedNinja;
 
 int main()
 {
+	List<double>::StaticInit(&std::cout, false);
 
 	// Run all unit tests and return the result
-	return MbeddedNinja::TestRegister::RunAllTests();
+	return TestRegister::RunAllTests();
 	
 }

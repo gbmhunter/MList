@@ -2,7 +2,7 @@
 //! @file				MList.cpp
 //! @author				Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 //! @created			2014-10-16
-//! @last-modified		2014-10-16
+//! @last-modified		2014-10-17
 //! @brief
 //! @details
 //!						See README.rst in repo root dir for more info.
@@ -35,6 +35,8 @@
 
 namespace MbeddedNinja
 {
+
+
 
 	//============================================================================================//
 	//=============================== PUBLIC METHOD DEFINITIONS ==================================//
