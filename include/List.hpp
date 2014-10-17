@@ -104,7 +104,7 @@ namespace MbeddedNinja
 		//======================================================================================//
 
 		List() :
-			numElements(0),
+			numNodes(0),
 			firstNode(nullptr),
 			lastNode(nullptr)
 		{
@@ -119,6 +119,84 @@ namespace MbeddedNinja
 
 		static std::ostream * ostream;
 		static bool isDebugPrintingEnabled;
+
+		uint32_t NumNodes() const
+		{
+			return this->numNodes;
+		}
+
+		//! @brief		Deletes the list node pointed to by the iterator it.
+		void Delete(Iterator it)
+		{
+			if(List::isDebugPrintingEnabled)
+				std::cerr << __PRETTY_FUNCTION__ << " called." << std::endl;
+
+			// Make sure Delete() wasn't called when there were no elements to delete
+			if(this->NumNodes() == 0)
+			{
+				M_ASSERT_FAIL("%s", "Error: List::Delete() called when there were no nodes to delete.");
+				return;
+			}
+
+			// There must be at least one element to delete now!
+
+			ListNode<dataT> * prevListNode = it.currListNode->prevListNode;
+			ListNode<dataT> * nextListNode = it.currListNode->nextListNode;
+
+			if(prevListNode == nullptr && nextListNode == nullptr)
+			{
+				// There must be only one node in the list
+				if(List::isDebugPrintingEnabled)
+					std::cerr << "We are deleting the only node in the list." << std::endl;
+
+				// No nodes will be left in list
+				this->firstNode = nullptr;
+				this->lastNode = nullptr;
+			}
+			else if(prevListNode == nullptr)
+			{
+				// We must be at the start of the list!
+				if(List::isDebugPrintingEnabled)
+					std::cerr << "We are deleting from the start of the list." << std::endl;
+
+
+				// We need to delete the first node, and change the firstNode variable
+				nextListNode->prevListNode = nullptr;
+				this->firstNode = nextListNode;
+			}
+			else if(nextListNode == nullptr)
+			{
+				// We must be at the end of the list!
+				if(List::isDebugPrintingEnabled)
+					std::cerr << "We are deleting from the end of the list." << std::endl;
+
+				//
+				prevListNode->nextListNode = nullptr;
+				this->lastNode = prevListNode;
+			}
+			else
+			{
+				// We must be somewhere in the middle of the list
+				if(List::isDebugPrintingEnabled)
+					std::cerr << "We are deleting from somewhere in the middle of the list." << std::endl;
+
+				// Stitch up the previous and next list nodes together, removing the current node from the list
+				prevListNode->nextListNode = nextListNode;
+				nextListNode->prevListNode = prevListNode;
+			}
+
+			if(List::isDebugPrintingEnabled)
+				std::cerr << "Deleting current node..." << std::endl;
+			// Now that we have stitched up the list nodes before and after the one we wish to delete, we
+			// can delete the current list node from memory.
+			delete it.currListNode;
+
+			// Decrement the node count
+			this->numNodes--;
+
+			if(List::isDebugPrintingEnabled)
+				std::cerr << "Returning..." << std::endl;
+		}
 
 		//! @brief		Inserts data before the position specified by the iterator, unless there are currently no nodes in list, and in that case, inserts at start.
 		void Insert(Iterator it, dataT & data)
@@ -136,7 +214,7 @@ namespace MbeddedNinja
 
 
 			// Now we need to insert it at the correct place
-			if(numElements == 0)
+			if(numNodes == 0)
 			{
 				if(List::isDebugPrintingEnabled)
 					std::cout << "List is empty, inserting first node." << std::endl;
@@ -209,7 +287,7 @@ namespace MbeddedNinja
 			}
 
 			// Increment element count
-			numElements++;
+			numNodes++;
 		}
 
 		//! @brief		Returns an iterator to the first node in the list.
@@ -262,7 +340,7 @@ namespace MbeddedNinja
 		//================================== PRIVATE VARIABLES =================================//
 		//======================================================================================//
 
-		uint32_t numElements;
+		uint32_t numNodes;
 
 		//! @brief		Pointer to the first node in the list.
 		ListNode<dataT> * firstNode;

@@ -12,7 +12,7 @@ A microcontroller-friendly doubly-linked list container.
 - Author: gbmhunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 - First Ever Commit: 2014-10-16
 - Last Modified: 2014-10-17
-- Version: v1.2.0.0
+- Version: v1.3.0.0
 - Company: mbedded.ninja
 - Project: MToolkit Module
 - Language: C++
@@ -71,6 +71,7 @@ Changelog
 ========= ========== =========================================================================================
 Version   Date       Comment
 ========= ========== =========================================================================================
+v1.3.0.0  2014-10-17 Added List::NumNodes() method which returns the number of nodes in list, closes #11. Added ability to delete a node and added one unit test, closes #9.
 v1.2.0.0  2014-10-17 List now supports the addition of nodes in the middle of the list, closes #8. Added unit test that inserts many nodes, closes #5. Added ability to enable/disable debug printing, closes #7.
 v1.1.0.0  2014-10-17 List::Insert() takes an iterator as an input parameter rather than a integer position, closes #2. Removed '<=' operator overload and instead implemented '!=' overload for halting iterator for loop, closes #1. Added unit test for inserting two nodes into list, closes #3. Removed unnecessary dependencies from README, closes #4.
 v1.0.0.0  2014-10-16 Initial commit, basic List, ListNode and Iterator objects have been implemented with one unit test.
