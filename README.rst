@@ -2,17 +2,17 @@
 MList
 =====
 
----------------------------------------------------------------------------------------------
+--------------------------------------------------------
 A microcontroller-friendly doubly-linked list container.
----------------------------------------------------------------------------------------------
+--------------------------------------------------------
 
 .. image:: https://api.travis-ci.org/mbedded-ninja/MList.png?branch=master   
 	:target: https://travis-ci.org/mbedded-ninja/MList
 
 - Author: gbmhunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 - First Ever Commit: 2014-10-16
-- Last Modified: 2014-10-17
-- Version: v1.3.0.0
+- Last Modified: 2014-10-19
+- Version: v1.4.0.0
 - Company: mbedded.ninja
 - Project: MToolkit Module
 - Language: C++
@@ -50,20 +50,43 @@ MAssert                External module      Providing runtime safety checks agai
 MUnitTest              External module      Framework for unit tests.
 ====================== ==================== ======================================================================
 
-Issues
-======
+Example
+=======
 
-See GitHub Issues.
+::
 
-Limitations
-===========
+	#include "MList/api/MListApi/hpp"
+	
+	using namespace MbeddedNinja;
 
-Nothing here yet.
-
-Usage
-=====
-
-See the unit tests in the 'test/' directory for basic examples.
+	int main()
+	{
+		// Create a new linked-list which will hold doubles
+		List<double> list;
+	
+		// Some data to add to the list
+		double myDouble1 = 5.5;
+		double myDouble2 = 8.9;
+	
+		// Create a iterator and point it to the start of the list
+		List<double>::Iterator it = list.Start();
+		
+		// Add some nodes to the list
+		list.Insert(it, myDouble1);
+		list.Insert(it, myDouble2);
+	
+		// Iterate through all nodes in the list and print the data
+		for(it = list.Start(); it != list.End(); it++)
+		{
+			std::cout << "data = '" << *it << "'" << std::endl;		
+		}
+	}
+	
+	// This will print...
+	// data = '5.5'
+	// data = '8.9'.
+	
+See the unit tests in the 'test/' directory for more examples.
 	
 Changelog
 =========
@@ -71,6 +94,7 @@ Changelog
 ========= ========== =========================================================================================
 Version   Date       Comment
 ========= ========== =========================================================================================
+v1.4.0.0  2014-10-19 Assert is now raised if memory allocation fails when you create a new node, closes #10. Renamed BasicTests.cpp to InsertNodeTests.cpp, closes #16. Added postfix decrement operator overload for Iterator class, closes #17. Added basic example to README, closes #14.
 v1.3.0.0  2014-10-17 Added List::NumNodes() method which returns the number of nodes in list, closes #11. Added ability to delete a node and added one unit test, closes #9.
 v1.2.0.0  2014-10-17 List now supports the addition of nodes in the middle of the list, closes #8. Added unit test that inserts many nodes, closes #5. Added ability to enable/disable debug printing, closes #7.
 v1.1.0.0  2014-10-17 List::Insert() takes an iterator as an input parameter rather than a integer position, closes #2. Removed '<=' operator overload and instead implemented '!=' overload for halting iterator for loop, closes #1. Added unit test for inserting two nodes into list, closes #3. Removed unnecessary dependencies from README, closes #4.

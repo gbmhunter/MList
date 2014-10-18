@@ -2,8 +2,8 @@
 //! @file				MList.cpp
 //! @author				Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 //! @created			2014-10-16
-//! @last-modified		2014-10-17
-//! @brief
+//! @last-modified		2014-10-19
+//! @brief				Doubly-linked list object for creating and managing lists.
 //! @details
 //!						See README.rst in repo root dir for more info.
 

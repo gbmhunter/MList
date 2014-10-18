@@ -2,8 +2,8 @@
 //! @file				List.hpp
 //! @author				Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 //! @created			2014-10-16
-//! @last-modified		2014-10-17
-//! @brief
+//! @last-modified		2014-10-19
+//! @brief				Doubly-linked list object for creating and managing lists.
 //! @details
 //!						See README.rst in repo root dir for more info.
 
@@ -62,18 +62,57 @@ namespace MbeddedNinja
 			public:
 
 			ListNode<dataT> * currListNode;
+
+			// We need this so that we can decrement from List::End() to the last node on the list
 			List<dataT> * list;
 
-			//! @brief		Postfix increment.
+			Iterator()	:
+				currListNode(nullptr),
+				list(nullptr)
+			{}
+
+			//! @brief		Postfix increment. Moves the iterator to the next node in the list.
+			//! @details	Will raise an assert if this is called when the iterator is at List::End().
 			Iterator & operator++(int)
 			{
 				// Makes sure we are not trying to increment if we are at List::End().
-				M_ASSERT(this->currListNode);
+				if(!this->currListNode)
+				{
+					M_ASSERT_FAIL("%s", "Postfix increment called on iterator which was at the end of a list.");
+					return *this;
+				}
 
 				this->currListNode = this->currListNode->nextListNode;
+
 				return *this;
 			}
 
+			//! @brief		Postfix decrement. Moves the iterator to the previous node in the list.
+			//! @details	Will raise an assert if this is called when the iterator is at List::Start().
+			Iterator & operator--(int)
+			{
+				if(!this->currListNode)
+				{
+					// Special case where we are at List::End(), and need to decrement onto the last node in the list
+					// This is why we save a pointer to the list in the iterator!
+					this->currListNode = list->lastNode;
+					return *this;
+				}
+
+				// Makes sure we are not trying to decrement if we are at the start of the list.
+				if(!this->currListNode->prevListNode)
+				{
+					M_ASSERT_FAIL("%s", "Postfix decrement of Iterator called while at start of list.");
+					return *this;
+				}
+
+				// This should work for all nodes except the first node (which should be caught by the assert above),
+				// and the List::End() node (which is handled above also).
+				this->currListNode = this->currListNode->prevListNode;
+				return *this;
+			}
+
+			//! @brief		Not-equals operator. Commonly used as the stop condition for a for loop iterating over all of the nodes in a list.
 			bool operator!=(const Iterator & it)
 			{
 				if(this->currListNode != it.currListNode)
@@ -82,18 +121,21 @@ namespace MbeddedNinja
 					return false;
 			}
 
-			/*bool operator<=(const Iterator & it)
-			{
-				if(this->currListElement == nullptr)
-					return false;
-				else
-					return true;
-			}*/
-
+			//! @brief		Dereference operator. Allows user to easily access the data at the current node pointed to by the iterator.
+			//! @details	Will raise an assert if this is called while at List::End() (this is one place beyond the end of the list).
 			dataT operator*() const
 			{
-				// Makes sure we are not trying to increment if we are at List::End().
-				M_ASSERT(this->currListNode);
+				// Makes sure we are not trying to dereference if we are at List::End().
+				if(!this->currListNode)
+				{
+					M_ASSERT_FAIL("%s", "Dereference operator called on iterator while it was at List::End().");
+
+					// Since we can't access a value here, let's return the default value for the datatype used.
+					static dataT defaultVal;
+					return defaultVal;
+				}
+
+				// Dereferencing should be o.k., let's return the data
 				return this->currListNode->data;
 			}
 
@@ -126,6 +168,7 @@ namespace MbeddedNinja
 		}
 
 		//! @brief		Deletes the list node pointed to by the iterator it.
+		//! @details	Assert will be raised if Delete() is called when there are no nodes.
 		void Delete(Iterator it)
 		{
 			if(List::isDebugPrintingEnabled)
@@ -204,18 +247,24 @@ namespace MbeddedNinja
 			if(List::isDebugPrintingEnabled)
 				std::cerr << __PRETTY_FUNCTION__ << " called." << std::endl;
 
-			// Make sure insert position is valid
-			//M_ASSERT(pos <= numElements);
-
+			// Lets create a new node
 			ListNode<dataT> * listNode = new ListNode<dataT>();
+
+			// Make sure memory was allocated successfully
+			if(!listNode)
+			{
+				M_ASSERT_FAIL("%s", "Memory allocation for new list node failed.");
+				return;
+			}
 
 			// Copy data to element
 			listNode->data = data;
 
 
 			// Now we need to insert it at the correct place
-			if(numNodes == 0)
+			if(this->firstNode == nullptr && this->lastNode == nullptr)
 			{
+				// List must be empty!
 				if(List::isDebugPrintingEnabled)
 					std::cout << "List is empty, inserting first node." << std::endl;
 				this->firstNode = listNode;
@@ -223,68 +272,81 @@ namespace MbeddedNinja
 				listNode->prevListNode = nullptr;
 				listNode->nextListNode = nullptr;
 			}
+			else if(it.currListNode == nullptr)
+			{
+				// We must be past the end of the list!
+				if(List::isDebugPrintingEnabled)
+					std::cout << "We are past the end of the list!" << std::endl;
+
+				ListNode<dataT> * prevListNode = this->lastNode;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
+
+				if(List::isDebugPrintingEnabled)
+					std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+
+				if(List::isDebugPrintingEnabled)
+					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+				// Point the old list node last element to this new one
+				prevListNode->nextListNode = listNode;
+				listNode->prevListNode = prevListNode;
+
+				// We are at the last node in the list
+				listNode->nextListNode = nullptr;
+
+				this->lastNode = listNode;
+			}
+			else if(it.currListNode->prevListNode == nullptr)
+			{
+				// We must be inserting at the start of the list
+
+				// This new node will be the first node in the list
+				this->firstNode = listNode;
+
+				listNode->prevListNode = this->firstNode;
+				listNode->nextListNode = it.currListNode;
+
+				// The current node is now the second node in the list
+				it.currListNode->prevListNode = listNode;
+
+			}
 			else
 			{
-				if(it.currListNode == nullptr)
-				{
-					// We must be past the end of the list!
-					if(List::isDebugPrintingEnabled)
-						std::cout << "We are past the end of the list!" << std::endl;
+				// We must be inserting somewhere in the middle of the list...
 
+				if(List::isDebugPrintingEnabled)
+					std::cout << "We are inserting before a existing and valid node!" << std::endl;
 
-					ListNode<dataT> * prevListNode = this->lastNode;
-					if(List::isDebugPrintingEnabled)
-						std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
+				//===== PREV NODE =====//
+				ListNode<dataT> * prevListNode = it.currListNode->prevListNode;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
 
-					if(List::isDebugPrintingEnabled)
-						std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
 
-					if(List::isDebugPrintingEnabled)
-						std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
-					// Point the old list node last element to this new one
-					prevListNode->nextListNode = listNode;
-					listNode->prevListNode = prevListNode;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+				// Point the old list node last element to this new one
+				prevListNode->nextListNode = listNode;
+				listNode->prevListNode = prevListNode;
 
-					// We are at the last node in the list
-					listNode->nextListNode = nullptr;
+				//===== NEXT NODE =====//
+				ListNode<dataT> * nextListNode = it.currListNode;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "currListNode = '" << nextListNode << "'." << std::endl;
 
-					this->lastNode = listNode;
-				}
-				else
-				{
-					if(List::isDebugPrintingEnabled)
-						std::cout << "We are inserting before a existing and valid node!" << std::endl;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "currListNode->data = '"<< nextListNode->data << "'." << std::endl;
 
-					//===== PREV NODE =====//
-					ListNode<dataT> * prevListNode = it.currListNode->prevListNode;
-					if(List::isDebugPrintingEnabled)
-						std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
+				if(List::isDebugPrintingEnabled)
+					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
+				// Point the old list node last element to this new one
+				nextListNode->prevListNode = listNode;
+				listNode->nextListNode = nextListNode;
 
-					if(List::isDebugPrintingEnabled)
-						std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
-
-					if(List::isDebugPrintingEnabled)
-						std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
-					// Point the old list node last element to this new one
-					prevListNode->nextListNode = listNode;
-					listNode->prevListNode = prevListNode;
-
-					//===== NEXT NODE =====//
-					ListNode<dataT> * nextListNode = it.currListNode;
-					if(List::isDebugPrintingEnabled)
-						std::cout << "currListNode = '" << nextListNode << "'." << std::endl;
-
-					if(List::isDebugPrintingEnabled)
-						std::cout << "currListNode->data = '"<< nextListNode->data << "'." << std::endl;
-
-					if(List::isDebugPrintingEnabled)
-						std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
-					// Point the old list node last element to this new one
-					nextListNode->prevListNode = listNode;
-					listNode->nextListNode = nextListNode;
-
-				}
 			}
+
 
 			// Increment element count
 			numNodes++;
