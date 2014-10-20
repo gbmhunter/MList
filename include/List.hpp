@@ -359,8 +359,8 @@ namespace MbeddedNinja
 				if(List::isDebugPrintingEnabled)
 					std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
 
-				if(List::isDebugPrintingEnabled)
-					std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+				//if(List::isDebugPrintingEnabled)
+					//std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
 
 				if(List::isDebugPrintingEnabled)
 					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
@@ -399,8 +399,8 @@ namespace MbeddedNinja
 				if(List::isDebugPrintingEnabled)
 					std::cout << "prevListNode = '" << prevListNode << "'." << std::endl;
 
-				if(List::isDebugPrintingEnabled)
-					std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
+				//if(List::isDebugPrintingEnabled)
+				//	std::cout << "prevListNode->data = '"<< prevListNode->data << "'." << std::endl;
 
 				if(List::isDebugPrintingEnabled)
 					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;
@@ -413,8 +413,8 @@ namespace MbeddedNinja
 				if(List::isDebugPrintingEnabled)
 					std::cout << "currListNode = '" << nextListNode << "'." << std::endl;
 
-				if(List::isDebugPrintingEnabled)
-					std::cout << "currListNode->data = '"<< nextListNode->data << "'." << std::endl;
+				//if(List::isDebugPrintingEnabled)
+				//	std::cout << "currListNode->data = '"<< nextListNode->data << "'." << std::endl;
 
 				if(List::isDebugPrintingEnabled)
 					std::cout << "Adjusting neighbouring list node pointers..." << std::endl;

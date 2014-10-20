@@ -12,7 +12,7 @@ A microcontroller-friendly doubly-linked list container.
 - Author: gbmhunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 - First Ever Commit: 2014-10-16
 - Last Modified: 2014-10-20
-- Version: v1.4.2.0
+- Version: v1.4.3.0
 - Company: mbedded.ninja
 - Project: MToolkit Module
 - Language: C++
@@ -94,6 +94,7 @@ Changelog
 ========= ========== =========================================================================================
 Version   Date       Comment
 ========= ========== =========================================================================================
+v1.4.3.0  2014-10-20 Removed the printing of data to ostream, the data object may not support the '<<' operator, closes #23.
 v1.4.2.0  2014-10-20 An assert is now raised if iterator operations are called before an iterator is assigned to a list, closes #21. Refractored the List::Insert() method so that it has the same structure as List::Delete(), closes #13. Added unit tests that delete nodes from the start and the end of lists, as well as many from the middle, closes #12. Added operator overload for addition of Iterator and integer so we can increment/decrement more than one node at a time, closes #6.
 v1.4.1.0  2014-10-19 Deleted BasicTests.cpp as it was no longer needed.
 v1.4.0.0  2014-10-19 Assert is now raised if memory allocation fails when you create a new node, closes #10. Renamed BasicTests.cpp to InsertNodeTests.cpp, closes #16. Added postfix decrement operator overload for Iterator class, closes #17. Added basic example to README, closes #14.
