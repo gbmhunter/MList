@@ -2,7 +2,7 @@
 //! @file				List.hpp
 //! @author				Geoffrey Hunter <gbmhunter@gmail.com> (www.mbedded.ninja)
 //! @created			2014-10-16
-//! @last-modified		2014-10-19
+//! @last-modified		2014-10-20
 //! @brief				Doubly-linked list object for creating and managing lists.
 //! @details
 //!						See README.rst in repo root dir for more info.
@@ -72,9 +72,15 @@ namespace MbeddedNinja
 			{}
 
 			//! @brief		Postfix increment. Moves the iterator to the next node in the list.
-			//! @details	Will raise an assert if this is called when the iterator is at List::End().
+			//! @details	Will raise an assert if called when iterator has not yet been assigned to a list or the iterator is at List::End().
 			Iterator & operator++(int)
 			{
+				if(!this->list)
+				{
+					M_ASSERT_FAIL("%s", "Postfix increment called on iterator which has not yet been assigned to a list.");
+					return *this;
+				}
+
 				// Makes sure we are not trying to increment if we are at List::End().
 				if(!this->currListNode)
 				{
@@ -88,9 +94,15 @@ namespace MbeddedNinja
 			}
 
 			//! @brief		Postfix decrement. Moves the iterator to the previous node in the list.
-			//! @details	Will raise an assert if this is called when the iterator is at List::Start().
+			//! @details	Will raise an assert if called when iterator has not yet been assigned to a list or the iterator is at List::Start().
 			Iterator & operator--(int)
 			{
+				if(!this->list)
+				{
+					M_ASSERT_FAIL("%s", "Postfix decrement called on iterator which has not yet been assigned to a list.");
+					return *this;
+				}
+
 				if(!this->currListNode)
 				{
 					// Special case where we are at List::End(), and need to decrement onto the last node in the list
@@ -112,9 +124,65 @@ namespace MbeddedNinja
 				return *this;
 			}
 
+			Iterator & operator+=(int32_t i)
+			{
+				// Call the increment operator "i" number of times
+				// Because this is a linked list, and not something with a contiguous space in
+				// memory, there is no faster way of doing this...
+				for(uint32_t x = 0; x < i; x++)
+				{
+					(*this)++;
+				}
+
+				return *this;
+			}
+
+			Iterator & operator-=(int32_t i)
+			{
+				// Call the increment operator "i" number of times
+				// Because this is a linked list, and not something with a contiguous space in
+				// memory, there is no faster way of doing this...
+				for(uint32_t x = 0; x < i; x++)
+				{
+					(*this)--;
+				}
+
+				return *this;
+			}
+
+
+			Iterator operator+(uint32_t i)
+			{
+				// Create a new iterator, and copy across the contents of the existing one
+				Iterator result = *this;
+
+				// Now use += iterator
+				result+= i;
+
+				return result;
+			}
+
+			Iterator operator-(uint32_t i)
+			{
+				// Create a new iterator, and copy across the contents of the existing one
+				Iterator result = *this;
+
+				// Now use += iterator
+				result-= i;
+
+				return result;
+			}
+
 			//! @brief		Not-equals operator. Commonly used as the stop condition for a for loop iterating over all of the nodes in a list.
+			//! @details	Raises assert if iterator has not yet been assigned to a list.
 			bool operator!=(const Iterator & it)
 			{
+				if(!this->list)
+				{
+					M_ASSERT_FAIL("%s", "Not-equals operator called on iterator which has not yet been assigned to a list.");
+					return false;
+				}
+
 				if(this->currListNode != it.currListNode)
 					return true;
 				else
@@ -122,9 +190,18 @@ namespace MbeddedNinja
 			}
 
 			//! @brief		Dereference operator. Allows user to easily access the data at the current node pointed to by the iterator.
-			//! @details	Will raise an assert if this is called while at List::End() (this is one place beyond the end of the list).
+			//! @details	Will raise an assert if this is called while at List::End() (this is one place beyond the end of the list), or if iterator has not yet been assigned to a list.
 			dataT operator*() const
 			{
+				if(!this->list)
+				{
+					M_ASSERT_FAIL("%s", "Dereference operator called on iterator which has not yet been assigned to a list.");
+
+					// Since we can't access a value here, let's return the default value for the datatype used.
+					static dataT defaultVal;
+					return defaultVal;
+				}
+
 				// Makes sure we are not trying to dereference if we are at List::End().
 				if(!this->currListNode)
 				{
@@ -410,6 +487,8 @@ namespace MbeddedNinja
 
 		
 	}; // class List
+
+
 
 	template < typename dataT >
 	std::ostream * List<dataT>::ostream = nullptr;
